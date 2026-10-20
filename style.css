@@ -2,3 +2,12 @@
     text-decoration: line-through;
     opacity: 0.6;
 }
+
+.completed span {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.completed time {
+    opacity: 0.6;
+}

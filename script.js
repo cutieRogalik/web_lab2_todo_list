@@ -141,6 +141,11 @@ function renderTasks() {
         checkbox.type = "checkbox";
         checkbox.checked = task.completed;
 
+        checkbox.addEventListener("change", function() {
+            task.completed = checkbox.checked;
+            renderTasks();
+        });
+
         const deleteButton = document.createElement("button");
         deleteButton.type = "button";
         deleteButton.textContent = "Удалить";
