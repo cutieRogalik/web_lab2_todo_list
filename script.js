@@ -1,3 +1,6 @@
+const tasks = [];
+
+
 const main = document.createElement("main");
 document.body.append(main);
 
@@ -115,3 +118,67 @@ taskSection.append(taskTitle);
 const taskList = document.createElement("ul");
 
 taskSection.append(taskList);
+
+//добавляем задачи
+function renderTasks() {
+    taskList.replaceChildren();
+
+    tasks.forEach(function(task) {
+        const taskItem = document.createElement("li");
+
+        if (task.completed) {
+            taskItem.classList.add("completed");
+        }
+
+        const taskText = document.createElement("span");
+        taskText.textContent = task.title;
+
+        const taskDate = document.createElement("time");
+        taskDate.textContent = task.date;
+        taskDate.dateTime = task.date;
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = task.completed;
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.textContent = "Удалить";
+
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.textContent = "Редактировать";
+       
+        taskItem.append(
+            checkbox,
+            taskText,
+            taskDate,
+            editButton,
+            deleteButton
+        );
+
+        taskList.append(taskItem);
+    });
+}
+
+form.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const title = taskInput.value.trim();
+    const date = dateInput.value;
+
+    if (title === "") {
+        return;
+    }
+
+    const task = {
+        id: Date.now(),
+        title: title,
+        date: date,
+        completed: false
+    };
+
+    tasks.push(task);
+    renderTasks();
+    form.reset();
+});
