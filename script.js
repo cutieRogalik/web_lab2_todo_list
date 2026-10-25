@@ -123,7 +123,23 @@ taskSection.append(taskList);
 function renderTasks() {
     taskList.replaceChildren();
 
-    tasks.forEach(function(task) {
+
+    const searchText = searchInput.value.trim().toLowerCase();
+
+    const status = filterSelect.value;
+
+    const filteredTasks = tasks.filter(function(task) {
+        const matchesSearch = task.title.toLowerCase().includes(searchText);
+
+        const matchesStatus =
+            status === "all" ||
+            (status === "active" && !task.completed) ||
+            (status === "completed" && task.completed);
+
+        return matchesSearch && matchesStatus;
+    });
+
+    filteredTasks.forEach(function(task) {
         const taskItem = document.createElement("li");
 
         if (task.completed) {
@@ -165,6 +181,45 @@ function renderTasks() {
         const editButton = document.createElement("button");
         editButton.type = "button";
         editButton.textContent = "Редактировать";
+
+        editButton.addEventListener("click", function() {
+            if (taskItem.querySelector(".edit-input")) {
+                return;
+            }
+
+            const editInput = document.createElement("input");
+            editInput.type = "text";
+            editInput.value = task.title;
+            editInput.classList.add("edit-input");
+
+            const saveButton = document.createElement("button");
+            saveButton.type = "button";
+            saveButton.textContent = "Сохранить";
+
+            const cancelButton = document.createElement("button");
+            cancelButton.type = "button";
+            cancelButton.textContent = "Отмена";
+
+            taskItem.append(editInput, saveButton, cancelButton);
+
+            editInput.focus();
+
+            saveButton.addEventListener("click", function() {
+                const newTitle = editInput.value.trim();
+
+                if (newTitle === "") {
+                    return;
+                }
+
+                task.title = newTitle;
+
+                renderTasks();
+            });
+
+            cancelButton.addEventListener("click", function() {
+                renderTasks();
+            });
+        });
        
         taskItem.append(
             checkbox,
@@ -198,4 +253,14 @@ form.addEventListener("submit", function(event) {
     tasks.push(task);
     renderTasks();
     form.reset();
+});
+
+renderTasks();
+
+searchInput.addEventListener("input", function() {
+    renderTasks();
+});
+
+filterSelect.addEventListener("change", function() {
+    renderTasks();
 });
