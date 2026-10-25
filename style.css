@@ -1,13 +1,538 @@
-.completed {
-    text-decoration: line-through;
-    opacity: 0.6;
+* {
+    box-sizing: border-box;
 }
 
-.completed span {
-    text-decoration: line-through;
-    opacity: 0.6;
+:root {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #171717;
+    background: #f4f4f4;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
+
+    --background: #f4f4f4;
+    --card: #ffffff;
+    --text: #171717;
+    --muted: #858585;
+    --border: #eeeeee;
+    --control-border: #dedede;
+    --radius: 22px;
 }
 
-.completed time {
-    opacity: 0.6;
+body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    padding: 54px 24px;
+    background: var(--background);
+    color: var(--text);
+}
+
+button,
+input,
+select {
+    font: inherit;
+}
+
+button {
+    color: inherit;
+}
+
+input,
+select {
+    min-width: 0;
+    max-width: 100%;
+    color: var(--text);
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+    outline: 2px solid #888888;
+    outline-offset: 3px;
+}
+
+main {
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+header {
+    margin: 0 0 26px;
+    text-align: center;
+}
+
+h1 {
+    margin: 0 0 8px;
+    color: var(--text);
+    font-size: clamp(28px, 4vw, 36px);
+    font-weight: 600;
+    letter-spacing: -1px;
+}
+
+header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+h2 {
+    margin: 28px 0 16px;
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.4px;
+}
+
+form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    margin: 0 0 30px;
+    padding: 18px 24px;
+    border: 1px solid #f0f0f0;
+    border-radius: var(--radius);
+    background: var(--card);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.035);
+}
+
+form input[type="text"] {
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    font-size: 19px;
+}
+
+form input[type="text"]::placeholder {
+    color: #888888;
+}
+
+form input[type="text"]:focus-visible {
+    outline: none;
+}
+
+form input[type="date"] {
+    width: 145px;
+    min-height: 40px;
+    padding: 7px 8px;
+    border: 0;
+    border-radius: 8px;
+    background: #f7f7f7;
+    font-size: 13px;
+}
+
+form button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    min-height: 42px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #111111;
+    font-size: 0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+form button::before {
+    content: "+";
+    font-size: 36px;
+    font-weight: 300;
+    line-height: 1;
+}
+
+form button:hover {
+    background: #f2f2f2;
+}
+
+section {
+    min-width: 0;
+}
+
+section input[type="search"] {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    margin: 0 0 10px;
+    padding: 12px 15px;
+    border: 1px solid var(--control-border);
+    border-radius: 11px;
+    background: #ffffff;
+    font-size: 15px;
+}
+
+section input[type="search"]::placeholder {
+    color: #929292;
+}
+
+section select {
+    min-height: 40px;
+    margin: 0 8px 12px 0;
+    padding: 8px 32px 8px 12px;
+    border: 1px solid var(--control-border);
+    border-radius: 9px;
+    background-color: #ffffff;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+#task-list {
+    margin: 0;
+    padding: 8px 26px;
+    border: 1px solid #f0f0f0;
+    border-radius: var(--radius);
+    background: var(--card);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.035);
+    list-style: none;
+}
+
+#task-list:empty {
+    min-height: 20px;
+}
+
+#task-list li {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+    min-height: 78px;
+    margin: 0;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    overflow-wrap: anywhere;
+}
+
+#task-list li:last-child {
+    border-bottom: 0;
+}
+
+#task-list li span {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-right: auto;
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+#task-list li time {
+    flex: 0 0 auto;
+    margin-left: 4px;
+    color: var(--muted);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+#task-list li input[type="checkbox"] {
+    flex: 0 0 27px;
+    width: 27px;
+    height: 27px;
+    min-height: 27px;
+    margin: 0 2px 0 0;
+    padding: 0;
+    accent-color: #171717;
+    cursor: pointer;
+}
+
+#task-list li button {
+    display: inline-flex;
+    flex: 0 0 34px;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #111111;
+    font-size: 0;
+    cursor: pointer;
+    transition: background-color 0.18s ease;
+}
+
+#task-list li button:hover {
+    background: #f1f1f1;
+}
+
+#task-list li .edit-button::before {
+    content: "✎";
+    font-family: Arial, sans-serif;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1;
+}
+
+#task-list li .delete-button::before {
+    content: "×";
+    font-family: Arial, sans-serif;
+    font-size: 31px;
+    font-weight: 300;
+    line-height: 1;
+}
+
+#task-list li.completed span {
+    color: #777777;
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+
+#task-list li.completed time {
+    color: #a0a0a0;
+}
+
+#task-list li[draggable="true"] {
+    cursor: grab;
+}
+
+#task-list li[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+#task-list li.editing {
+    display: block;
+    padding: 16px 0;
+    background: #ffffff;
+    cursor: default;
+}
+
+#task-list li.editing > input[type="checkbox"],
+#task-list li.editing > span,
+#task-list li.editing > time,
+#task-list li.editing > .edit-button,
+#task-list li.editing > .delete-button {
+    display: none;
+}
+
+#task-list li.editing .edit-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 150px auto auto;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+#task-list li.editing .edit-controls .edit-input,
+#task-list li.editing .edit-controls input[type="date"] {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 9px 11px;
+    border: 1px solid #dedede;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #171717;
+    font-size: 14px;
+}
+
+#task-list li.editing .edit-controls .edit-input {
+    font-size: 15px;
+}
+
+#task-list li.editing .edit-controls button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 0;
+    min-height: 40px;
+    padding: 9px 12px;
+    border: 1px solid #dedede;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #171717;
+    font-size: 13px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+#task-list li.editing .edit-controls .save-edit-button {
+    border-color: #171717;
+    background: #171717;
+    color: #ffffff;
+}
+
+#task-list li.editing .edit-controls .save-edit-button:hover {
+    background: #333333;
+}
+
+#task-list li.editing .edit-controls .cancel-edit-button:hover {
+    background: #f2f2f2;
+}
+
+@media (max-width: 700px) {
+    body {
+        padding: 30px 18px;
+    }
+
+    #task-list {
+        padding-right: 20px;
+        padding-left: 20px;
+    }
+
+    #task-list li {
+        gap: 12px;
+    }
+
+    #task-list li span {
+        font-size: 16px;
+    }
+
+    #task-list li.editing .edit-controls {
+        grid-template-columns: minmax(0, 1fr) minmax(120px, 150px);
+    }
+
+    #task-list li.editing .edit-controls button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 500px) {
+    body {
+        padding: 16px 10px;
+    }
+
+    header {
+        margin-bottom: 20px;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    header p {
+        font-size: 14px;
+    }
+
+    h2 {
+        margin-top: 24px;
+        font-size: 19px;
+    }
+
+    form {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+        margin-bottom: 22px;
+        padding: 12px 14px;
+        border-radius: 16px;
+    }
+
+    form input[type="text"] {
+        grid-column: 1;
+        font-size: 16px;
+    }
+
+    form input[type="date"] {
+        grid-column: 1;
+        grid-row: 2;
+        width: 100%;
+    }
+
+    form button {
+        grid-column: 2;
+        grid-row: 1 / 3;
+    }
+
+    #task-list {
+        padding: 4px 15px;
+        border-radius: 16px;
+    }
+
+    #task-list li {
+        display: grid;
+        grid-template-columns: 27px minmax(0, 1fr) 30px 30px;
+        gap: 8px;
+        min-height: 70px;
+        padding: 13px 0;
+    }
+
+    #task-list li input[type="checkbox"] {
+        grid-column: 1;
+        grid-row: 1;
+        align-self: center;
+    }
+
+    #task-list li span {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: center;
+        font-size: 15px;
+    }
+
+    #task-list li time {
+        grid-column: 2;
+        grid-row: 2;
+        margin: 0;
+        font-size: 12px;
+        white-space: normal;
+    }
+
+    #task-list li .edit-button {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    #task-list li .delete-button {
+        grid-column: 4;
+        grid-row: 1;
+    }
+
+    #task-list li.editing .edit-controls {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 9px;
+    }
+
+    #task-list li.editing .edit-controls input,
+    #task-list li.editing .edit-controls button {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 350px) {
+    #task-list {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    #task-list li {
+        grid-template-columns: 24px minmax(0, 1fr) 27px 27px;
+        gap: 6px;
+    }
+
+    #task-list li input[type="checkbox"] {
+        width: 24px;
+        height: 24px;
+        min-height: 24px;
+    }
+
+    #task-list li button {
+        width: 27px;
+        min-width: 27px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
 }
