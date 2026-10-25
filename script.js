@@ -1,4 +1,10 @@
-const tasks = [];
+const savedTasks = localStorage.getItem("tasks");
+
+const tasks = savedTasks ? JSON.parse(savedTasks) : [];
+
+function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
 
 
 const main = document.createElement("main");
@@ -139,7 +145,17 @@ function renderTasks() {
         return matchesSearch && matchesStatus;
     });
 
-    filteredTasks.forEach(function(task) {
+    const sortedTasks = filteredTasks.slice();
+
+    sortedTasks.sort(function(a, b) {
+        if (sortSelect.value === "newest") {
+            return b.date.localeCompare(a.date);
+        }
+
+        return a.date.localeCompare(b.date);
+    });
+
+    sortedTasks.forEach(function(task) {
         const taskItem = document.createElement("li");
 
         if (task.completed) {
@@ -159,6 +175,7 @@ function renderTasks() {
 
         checkbox.addEventListener("change", function() {
             task.completed = checkbox.checked;
+            saveTasks();
             renderTasks();
         });
 
@@ -173,6 +190,7 @@ function renderTasks() {
 
             if (index !== -1) {
                 tasks.splice(index, 1);
+                saveTasks();
             }
 
             renderTasks();
@@ -192,6 +210,10 @@ function renderTasks() {
             editInput.value = task.title;
             editInput.classList.add("edit-input");
 
+            const editDateInput = document.createElement("input");
+            editDateInput.type = "date";
+            editDateInput.value = task.date;
+
             const saveButton = document.createElement("button");
             saveButton.type = "button";
             saveButton.textContent = "Сохранить";
@@ -200,19 +222,26 @@ function renderTasks() {
             cancelButton.type = "button";
             cancelButton.textContent = "Отмена";
 
-            taskItem.append(editInput, saveButton, cancelButton);
+            taskItem.append(
+                editInput,
+                editDateInput,
+                saveButton,
+                cancelButton
+            );
 
             editInput.focus();
 
             saveButton.addEventListener("click", function() {
                 const newTitle = editInput.value.trim();
+                const newDate = editDateInput.value;
 
-                if (newTitle === "") {
+                if (newTitle === "" || newDate === "") {
                     return;
                 }
 
                 task.title = newTitle;
-
+                task.date = newDate;
+                saveTasks();
                 renderTasks();
             });
 
@@ -251,6 +280,7 @@ form.addEventListener("submit", function(event) {
     };
 
     tasks.push(task);
+    saveTasks();
     renderTasks();
     form.reset();
 });
@@ -262,5 +292,9 @@ searchInput.addEventListener("input", function() {
 });
 
 filterSelect.addEventListener("change", function() {
+    renderTasks();
+});
+
+sortSelect.addEventListener("change", function() {
     renderTasks();
 });
