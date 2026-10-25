@@ -150,6 +150,18 @@ function renderTasks() {
         deleteButton.type = "button";
         deleteButton.textContent = "Удалить";
 
+        deleteButton.addEventListener("click", function() {
+            const index = tasks.findIndex(function(item) {
+                return item.id === task.id;
+            });
+
+            if (index !== -1) {
+                tasks.splice(index, 1);
+            }
+
+            renderTasks();
+        });
+
         const editButton = document.createElement("button");
         editButton.type = "button";
         editButton.textContent = "Редактировать";
