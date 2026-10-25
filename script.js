@@ -4,6 +4,7 @@ const tasks = savedTasks ? JSON.parse(savedTasks) : [];
 
 function saveTasks() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
+    localStorage.setItem("sortType", sortSelect.value);
 }
 
 
@@ -97,6 +98,7 @@ filterSelect.append(completedOption);
 //сортировка
 const sortSelect = document.createElement("select");
 
+
 controlsSection.append(sortSelect);
 const newestOption = document.createElement("option");
 
@@ -106,6 +108,17 @@ newestOption.textContent = "Сначала новые";
 sortSelect.append(newestOption);
 
 const oldestOption = document.createElement("option");
+const manualOption = document.createElement("option");
+
+manualOption.value = "manual";
+manualOption.textContent = "Мой порядок";
+
+sortSelect.append(manualOption);
+const savedSortType = localStorage.getItem("sortType");
+
+if (savedSortType) {
+    sortSelect.value = savedSortType;
+}
 
 oldestOption.value = "oldest";
 oldestOption.textContent = "Сначала старые";
@@ -147,16 +160,76 @@ function renderTasks() {
 
     const sortedTasks = filteredTasks.slice();
 
-    sortedTasks.sort(function(a, b) {
-        if (sortSelect.value === "newest") {
-            return b.date.localeCompare(a.date);
-        }
+    if (sortSelect.value !== "manual") {
+        sortedTasks.sort(function(a, b) {
+            if (sortSelect.value === "newest") {
+                return b.date.localeCompare(a.date);
+            }
 
-        return a.date.localeCompare(b.date);
-    });
+            return a.date.localeCompare(b.date);
+        });
+    }
 
     sortedTasks.forEach(function(task) {
         const taskItem = document.createElement("li");
+        taskItem.draggable = true;
+
+        taskItem.addEventListener("dragstart", function(event) {
+            event.dataTransfer.setData("text/plain", String(task.id));
+            event.dataTransfer.effectAllowed = "move";
+        });
+
+        taskItem.addEventListener("dragover", function(event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+        });
+
+        taskItem.addEventListener("drop", function(event) {
+            event.preventDefault();
+
+            const draggedId = Number(
+                event.dataTransfer.getData("text/plain")
+            );
+
+            if (draggedId === task.id) {
+                return;
+            }
+
+            const draggedIndex = tasks.findIndex(function(item) {
+                return item.id === draggedId;
+            });
+
+            const targetIndex = tasks.findIndex(function(item) {
+                return item.id === task.id;
+            });
+
+            if (draggedIndex === -1 || targetIndex === -1) {
+                return;
+            }
+
+            const targetRect = taskItem.getBoundingClientRect();
+            const cursorY = event.clientY;
+            const targetMiddle = targetRect.top + targetRect.height / 2;
+
+            const insertAfter = cursorY > targetMiddle;
+
+            const draggedTask = tasks.splice(draggedIndex, 1)[0];
+
+            let newTargetIndex = tasks.findIndex(function(item) {
+                return item.id === task.id;
+            });
+
+            if (insertAfter) {
+                newTargetIndex++;
+            }
+
+            tasks.splice(newTargetIndex, 0, draggedTask);
+
+            sortSelect.value = "manual";
+
+            saveTasks();
+            renderTasks();
+        });
 
         if (task.completed) {
             taskItem.classList.add("completed");
@@ -296,5 +369,6 @@ filterSelect.addEventListener("change", function() {
 });
 
 sortSelect.addEventListener("change", function() {
+    localStorage.setItem("sortType", sortSelect.value);
     renderTasks();
 });
