@@ -1,12 +1,10 @@
 const savedTasks = localStorage.getItem("tasks");
-
 const tasks = savedTasks ? JSON.parse(savedTasks) : [];
 
 function saveTasks() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
     localStorage.setItem("sortType", sortSelect.value);
 }
-
 
 const main = document.createElement("main");
 document.body.append(main);
@@ -19,136 +17,105 @@ title.textContent = "To-Do List";
 header.append(title);
 
 const description = document.createElement("p");
-
 description.textContent = "Управляй своими задачами легко и удобно";
-
 header.append(description);
 
-//форма
 const form = document.createElement("form");
-
 main.append(form);
 
-//таск
 const taskInput = document.createElement("input");
-
 taskInput.type = "text";
 taskInput.placeholder = "Введите задачу";
 taskInput.required = true;
-
 form.append(taskInput);
 
-//дата
 const dateInput = document.createElement("input");
-
 dateInput.type = "date";
 dateInput.required = true;
-
 form.append(dateInput);
 
-//добавить таск
 const addButton = document.createElement("button");
-
 addButton.type = "submit";
 addButton.textContent = "Добавить задачу";
-
+addButton.setAttribute("aria-label", "Добавить задачу");
 form.append(addButton);
 
-//управление списком
 const controlsSection = document.createElement("section");
 main.append(controlsSection);
 
 const controlsTitle = document.createElement("h2");
 controlsTitle.textContent = "Управление задачами";
-
 controlsSection.append(controlsTitle);
 
 const searchInput = document.createElement("input");
-
 searchInput.type = "search";
 searchInput.placeholder = "Поиск по названию";
-
+searchInput.setAttribute("aria-label", "Поиск по названию");
 controlsSection.append(searchInput);
 
 const filterSelect = document.createElement("select");
-
+filterSelect.setAttribute("aria-label", "Фильтр задач");
 controlsSection.append(filterSelect);
 
-const allOption = document.createElement("option");
+const filterOptions = [
+    ["all", "Все задачи"],
+    ["active", "Активные"],
+    ["completed", "Выполненные"]
+];
 
-allOption.value = "all";
-allOption.textContent = "Все задачи";
+filterOptions.forEach(function (optionData) {
+    const option = document.createElement("option");
+    option.value = optionData[0];
+    option.textContent = optionData[1];
+    filterSelect.append(option);
+});
 
-filterSelect.append(allOption);
-
-const activeOption = document.createElement("option");
-
-activeOption.value = "active";
-activeOption.textContent = "Активные";
-
-filterSelect.append(activeOption);
-
-const completedOption = document.createElement("option");
-
-completedOption.value = "completed";
-completedOption.textContent = "Выполненные";
-
-filterSelect.append(completedOption);
-
-//сортировка
 const sortSelect = document.createElement("select");
-
-
+sortSelect.setAttribute("aria-label", "Сортировка задач");
 controlsSection.append(sortSelect);
-const newestOption = document.createElement("option");
 
-newestOption.value = "newest";
-newestOption.textContent = "Сначала новые";
+const sortOptions = [
+    ["newest", "Сначала новые"],
+    ["oldest", "Сначала старые"],
+    ["manual", "Мой порядок"]
+];
 
-sortSelect.append(newestOption);
+sortOptions.forEach(function (optionData) {
+    const option = document.createElement("option");
+    option.value = optionData[0];
+    option.textContent = optionData[1];
+    sortSelect.append(option);
+});
 
-const oldestOption = document.createElement("option");
-const manualOption = document.createElement("option");
-
-manualOption.value = "manual";
-manualOption.textContent = "Мой порядок";
-
-sortSelect.append(manualOption);
 const savedSortType = localStorage.getItem("sortType");
 
-if (savedSortType) {
+if (sortOptions.some(function (option) {
+    return option[0] === savedSortType;
+})) {
     sortSelect.value = savedSortType;
 }
 
-oldestOption.value = "oldest";
-oldestOption.textContent = "Сначала старые";
-
-sortSelect.append(oldestOption);
-
-//список задач
 const taskSection = document.createElement("section");
 main.append(taskSection);
 
 const taskTitle = document.createElement("h2");
 taskTitle.textContent = "Мои задачи";
-
 taskSection.append(taskTitle);
 
 const taskList = document.createElement("ul");
-
+taskList.id = "task-list";
 taskSection.append(taskList);
 
-//добавляем задачи
 function renderTasks() {
     taskList.replaceChildren();
 
-
     const searchText = searchInput.value.trim().toLowerCase();
-
     const status = filterSelect.value;
 
-    const filteredTasks = tasks.filter(function(task) {
-        const matchesSearch = task.title.toLowerCase().includes(searchText);
+    const filteredTasks = tasks.filter(function (task) {
+        const matchesSearch = task.title
+            .toLowerCase()
+            .includes(searchText);
 
         const matchesStatus =
             status === "all" ||
@@ -161,7 +128,7 @@ function renderTasks() {
     const sortedTasks = filteredTasks.slice();
 
     if (sortSelect.value !== "manual") {
-        sortedTasks.sort(function(a, b) {
+        sortedTasks.sort(function (a, b) {
             if (sortSelect.value === "newest") {
                 return b.date.localeCompare(a.date);
             }
@@ -170,21 +137,25 @@ function renderTasks() {
         });
     }
 
-    sortedTasks.forEach(function(task) {
+    sortedTasks.forEach(function (task) {
         const taskItem = document.createElement("li");
         taskItem.draggable = true;
 
-        taskItem.addEventListener("dragstart", function(event) {
+        if (task.completed) {
+            taskItem.classList.add("completed");
+        }
+
+        taskItem.addEventListener("dragstart", function (event) {
             event.dataTransfer.setData("text/plain", String(task.id));
             event.dataTransfer.effectAllowed = "move";
         });
 
-        taskItem.addEventListener("dragover", function(event) {
+        taskItem.addEventListener("dragover", function (event) {
             event.preventDefault();
             event.dataTransfer.dropEffect = "move";
         });
 
-        taskItem.addEventListener("drop", function(event) {
+        taskItem.addEventListener("drop", function (event) {
             event.preventDefault();
 
             const draggedId = Number(
@@ -195,11 +166,11 @@ function renderTasks() {
                 return;
             }
 
-            const draggedIndex = tasks.findIndex(function(item) {
+            const draggedIndex = tasks.findIndex(function (item) {
                 return item.id === draggedId;
             });
 
-            const targetIndex = tasks.findIndex(function(item) {
+            const targetIndex = tasks.findIndex(function (item) {
                 return item.id === task.id;
             });
 
@@ -208,14 +179,12 @@ function renderTasks() {
             }
 
             const targetRect = taskItem.getBoundingClientRect();
-            const cursorY = event.clientY;
             const targetMiddle = targetRect.top + targetRect.height / 2;
-
-            const insertAfter = cursorY > targetMiddle;
+            const insertAfter = event.clientY > targetMiddle;
 
             const draggedTask = tasks.splice(draggedIndex, 1)[0];
 
-            let newTargetIndex = tasks.findIndex(function(item) {
+            let newTargetIndex = tasks.findIndex(function (item) {
                 return item.id === task.id;
             });
 
@@ -226,38 +195,44 @@ function renderTasks() {
             tasks.splice(newTargetIndex, 0, draggedTask);
 
             sortSelect.value = "manual";
-
             saveTasks();
             renderTasks();
         });
 
-        if (task.completed) {
-            taskItem.classList.add("completed");
-        }
-
-        const taskText = document.createElement("span");
-        taskText.textContent = task.title;
-
-        const taskDate = document.createElement("time");
-        taskDate.textContent = task.date;
-        taskDate.dateTime = task.date;
-
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.checked = task.completed;
+        checkbox.setAttribute("aria-label", "Отметить выполнение");
 
-        checkbox.addEventListener("change", function() {
+        checkbox.addEventListener("change", function () {
             task.completed = checkbox.checked;
             saveTasks();
             renderTasks();
         });
 
+        const taskText = document.createElement("span");
+        taskText.textContent = task.title;
+
+        const taskDate = document.createElement("time");
+        const dateParts = task.date.split("-");
+        taskDate.textContent =
+            dateParts[2] + "." + dateParts[1] + "." + dateParts[0];
+        taskDate.dateTime = task.date;
+
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.textContent = "Редактировать";
+        editButton.classList.add("edit-button");
+        editButton.setAttribute("aria-label", "Редактировать задачу");
+
         const deleteButton = document.createElement("button");
         deleteButton.type = "button";
         deleteButton.textContent = "Удалить";
+        deleteButton.classList.add("delete-button");
+        deleteButton.setAttribute("aria-label", "Удалить задачу");
 
-        deleteButton.addEventListener("click", function() {
-            const index = tasks.findIndex(function(item) {
+        deleteButton.addEventListener("click", function () {
+            const index = tasks.findIndex(function (item) {
                 return item.id === task.id;
             });
 
@@ -269,42 +244,49 @@ function renderTasks() {
             renderTasks();
         });
 
-        const editButton = document.createElement("button");
-        editButton.type = "button";
-        editButton.textContent = "Редактировать";
-
-        editButton.addEventListener("click", function() {
-            if (taskItem.querySelector(".edit-input")) {
+        editButton.addEventListener("click", function () {
+            if (taskItem.querySelector(".edit-controls")) {
                 return;
             }
+
+            taskItem.classList.add("editing");
 
             const editInput = document.createElement("input");
             editInput.type = "text";
             editInput.value = task.title;
             editInput.classList.add("edit-input");
+            editInput.placeholder = "Название задачи";
+            editInput.required = true;
 
             const editDateInput = document.createElement("input");
             editDateInput.type = "date";
             editDateInput.value = task.date;
+            editDateInput.required = true;
 
             const saveButton = document.createElement("button");
             saveButton.type = "button";
             saveButton.textContent = "Сохранить";
+            saveButton.classList.add("save-edit-button");
 
             const cancelButton = document.createElement("button");
             cancelButton.type = "button";
             cancelButton.textContent = "Отмена";
+            cancelButton.classList.add("cancel-edit-button");
 
-            taskItem.append(
+            const editControls = document.createElement("div");
+            editControls.classList.add("edit-controls");
+
+            editControls.append(
                 editInput,
                 editDateInput,
                 saveButton,
                 cancelButton
             );
 
+            taskItem.append(editControls);
             editInput.focus();
 
-            saveButton.addEventListener("click", function() {
+            saveButton.addEventListener("click", function () {
                 const newTitle = editInput.value.trim();
                 const newDate = editDateInput.value;
 
@@ -314,15 +296,16 @@ function renderTasks() {
 
                 task.title = newTitle;
                 task.date = newDate;
+
                 saveTasks();
                 renderTasks();
             });
 
-            cancelButton.addEventListener("click", function() {
+            cancelButton.addEventListener("click", function () {
                 renderTasks();
             });
         });
-       
+
         taskItem.append(
             checkbox,
             taskText,
@@ -335,13 +318,13 @@ function renderTasks() {
     });
 }
 
-form.addEventListener("submit", function(event) {
+form.addEventListener("submit", function (event) {
     event.preventDefault();
 
     const title = taskInput.value.trim();
     const date = dateInput.value;
 
-    if (title === "") {
+    if (title === "" || date === "") {
         return;
     }
 
@@ -353,22 +336,18 @@ form.addEventListener("submit", function(event) {
     };
 
     tasks.push(task);
+
     saveTasks();
     renderTasks();
     form.reset();
 });
 
-renderTasks();
+searchInput.addEventListener("input", renderTasks);
+filterSelect.addEventListener("change", renderTasks);
 
-searchInput.addEventListener("input", function() {
-    renderTasks();
-});
-
-filterSelect.addEventListener("change", function() {
-    renderTasks();
-});
-
-sortSelect.addEventListener("change", function() {
+sortSelect.addEventListener("change", function () {
     localStorage.setItem("sortType", sortSelect.value);
     renderTasks();
 });
+
+renderTasks();
